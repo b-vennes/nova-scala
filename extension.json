@@ -1,0 +1,20 @@
+{
+  "identifier": "com.brandenvennes",
+  "name": "Scala",
+  "organization": "Branden Vennes",
+  "description": "Scala syntax highlighting, completions,",
+  "version": "1.0",
+  "categories": [
+    "languages",
+    "completions"
+  ],
+  "main": "main.js",
+  "activationEvents": [
+    "onLanguage:scala"
+  ],
+  "entitlements": {
+    "process": true,
+    "filesystem": "readwrite",
+    "requests": true
+  }
+}
