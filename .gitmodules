@@ -1,6 +1,6 @@
 [submodule "tree-sitter-scala"]
 	path = tree-sitter-scala
-	url = ./tree-sitter-scala
+	url = https://github.com/tree-sitter/tree-sitter-scala.git
 [submodule "TreeSitterParserBuild"]
 	path = TreeSitterParserBuild
 	url = ./TreeSitterParserBuild
