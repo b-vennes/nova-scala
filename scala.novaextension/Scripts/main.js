@@ -3,7 +3,6 @@ var langserver = null;
 exports.activate = function () {
   // Do work when the extension is activated
   if (!langserver) {
-    console.log("activating Scala LSP");
     langserver = new ScalaLanguageServer();
   }
 };
@@ -11,7 +10,6 @@ exports.activate = function () {
 exports.deactivate = function () {
   // Clean up state before the extension is deactivated
   if (langserver) {
-    console.log("deactivating Scala LSP");
     langserver.deactivate();
     langserver = null;
   }
@@ -44,7 +42,6 @@ class ScalaLanguageServer {
     const clientOptions = {
       // The set of document syntaxes for which the server is valid
       syntaxes: ["scala"],
-      debug: true,
     };
     const client = new LanguageClient(
       "scala",
@@ -62,8 +59,6 @@ class ScalaLanguageServer {
       this.languageClient = client;
     } catch (err) {
       // If the .start() method throws, it's likely because the path to the language server is invalid
-      console.log(err);
-
       if (nova.inDevMode()) {
         console.error(err);
       }
