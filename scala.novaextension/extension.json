@@ -1,5 +1,5 @@
 {
-  "identifier": "com.brandenvennes",
+  "identifier": "com.brandenvennes.scala",
   "name": "Scala",
   "organization": "Branden Vennes",
   "description": "Scala syntax highlighting, completions,",
@@ -16,5 +16,16 @@
     "process": true,
     "filesystem": "readwrite",
     "requests": true
+  },
+  "commands": {
+    "command-palette": [
+      {
+        "title": "Metals: Import Build",
+        "command": "importBuild",
+        "filters": {
+            "syntaxes": ["scala"]
+        }
+      }
+    ]
   }
 }

@@ -1,75 +1,110 @@
-var langserver = null;
+var metalsLanguageClient = null;
 
-exports.activate = function () {
-  // Do work when the extension is activated
-  if (!langserver) {
-    langserver = new ScalaLanguageServer();
-  }
-};
+function metalsExecuteCommand(command, args) {
+  if (!metalsLanguageClient) return;
 
-exports.deactivate = function () {
-  // Clean up state before the extension is deactivated
-  if (langserver) {
-    langserver.deactivate();
-    langserver = null;
-  }
-};
-
-class ScalaLanguageServer {
-  constructor() {
-    // // Observe the configuration setting for the server's location, and restart the server on change
-    nova.config.observe("scala.metals-path", function (path) {
-      this.start(path);
-    }, this);
-  }
-
-  deactivate() {
-    this.stop();
-  }
-
-  start(path) {
-    if (this.languageClient) {
-      this.languageClient.stop();
-      nova.subscriptions.remove(this.languageClient);
+  metalsLanguageClient.sendRequest(
+    "workspace/executeCommand",
+    {
+      command: command,
+      arguments: args
     }
+  );
+}
 
-    const localPath = `${nova.extension.path}/metals`;
+const importBuild = () => metalsExecuteCommand("build-import", null);
+const runDoctor = () => metalsExecuteCommand("doctor-run", null);
 
-    // Create the client
-    const serverOptions = {
-      path: localPath,
-    };
-    const clientOptions = {
-      // The set of document syntaxes for which the server is valid
-      syntaxes: ["scala"],
-    };
-    const client = new LanguageClient(
-      "scala",
-      "Scala Language Server",
-      serverOptions,
-      clientOptions,
-    );
-
-    try {
-      // Start the client
-      client.start();
-
-      // Add the client to the subscriptions to be cleaned up
-      nova.subscriptions.add(client);
-      this.languageClient = client;
-    } catch (err) {
-      // If the .start() method throws, it's likely because the path to the language server is invalid
-      if (nova.inDevMode()) {
-        console.error(err);
-      }
-    }
+function startMetals() {
+  if (metalsLanguageClient) {
+    deactivateMetals();
+    nova.subscriptions.remove(metalsLanguageClient);
   }
 
-  stop() {
-    if (this.languageClient) {
-      this.languageClient.stop();
-      nova.subscriptions.remove(this.languageClient);
-      this.languageClient = null;
+  const localPath = `${nova.extension.path}/metals`;
+
+  // Create the client
+  const serverOptions = {
+    path: localPath,
+  };
+  const clientOptions = {
+    // The set of document syntaxes for which the server is valid
+    syntaxes: ["scala"],
+    debug: true,
+    initializationOptions: {
+      isHttpEnabled: true,
+      doctorVisibilityProvider: true,
+      doctorProvider: "json"
+    }
+  };
+  metalsLanguageClient = new LanguageClient(
+    "scala",
+    "Scala Language Server",
+    serverOptions,
+    clientOptions,
+  );
+
+  try {
+    metalsLanguageClient.start();
+    nova.subscriptions.add(metalsLanguageClient);
+  } catch (err) {
+    if (nova.inDevMode()) {
+      console.error(err);
     }
   }
 }
+
+function setupDoctor() {
+  if (!metalsLanguageClient) return;
+
+  console.log("adding on request hook");
+  metalsLanguageClient.onNotification(
+    "metals/executeClientCommand",
+    request => {
+      console.log(`Received execute client command: ${JSON.stringify(request)}`);
+
+      const command = request.command;
+      console.log(`Command is '${command}'.`)
+      if (command && command === "metals-doctor-run") {
+        console.log("Received run doctor request.");
+        runDoctor();
+      }
+    }
+  );
+}
+
+function deactivateMetals() {
+  if (!metalsLanguageClient) {
+    console.log("No Metals language client started.")
+    return;
+  }
+
+  metalsLanguageClient.stop();
+  nova.subscriptions.remove(metalsLanguageClient);
+
+  metalsLanguageClient = null;
+}
+
+function subscribeToConfig() {
+  nova.config.observe("scala.metals-path", function (path) {
+    this.start(path);
+  });
+}
+
+function setupImportBuildCommand() {
+  nova.commands.register(
+    "importBuild",
+    (input) =>
+      importBuild()
+  );
+}
+
+exports.activate = function () {
+  startMetals();
+  setupDoctor();
+  setupImportBuildCommand();
+};
+
+exports.deactivate = function () {
+  deactivateMetals();
+};
