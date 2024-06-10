@@ -1,4 +1,5 @@
 "val" @keyword.construct
+"var" @keyword.construct
 "object" @keyword.construct
 "class" @keyword.construct
 "trait" @keyword.construct
@@ -6,12 +7,16 @@
 "import" @keyword.construct
 "def" @keyword.construct
 "extension" @keyword.construct
+"type" @keyword.construct
 
 (class_definition
 	"case" @keyword.construct
 )
 (case_clause
 	"case" @keyword.condition
+)
+(object_definition
+	"case" @keyword.construct
 )
 
 (for_expression
@@ -34,14 +39,26 @@
 (modifiers
 	"final" @keyword.modifier
 )
-
+(modifiers "override" @keyword.modifier)
 (modifiers
 	"lazy" @keyword.modifier
 )
+(modifiers "implicit" @keyword.modifier)
 
 "using" @keyword.construct
 
 "new" @operator
+
+(lambda_expression
+	"=>" @operator
+)
+
+(block "{" @bracket)
+(block "}" @bracket)
+(case_block "{" @bracket)
+(case_block "}" @bracket)
+(template_body "{" @bracket)
+(template_body "}" @bracket)
 
 (comment) @comment
 (block_comment) @comment
