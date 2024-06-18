@@ -38,22 +38,6 @@ def build(novaPath: Path): IO[ExitCode] = for
   _ <- IO.println("Building Scala Nova extension")
   currentDirectory <- Files[IO].currentWorkingDirectory
   extensionDirectory = currentDirectory / "scala.novaextension"
-  _ <- currentDirectory.sh(
-    "coursier",
-    "bootstrap",
-    "--java-opt",
-    "-XX:+UseG1GC",
-    "--java-opt",
-    "-XX:+UseStringDeduplication",
-    "--java-opt",
-    "-Xss4m",
-    "--java-opt",
-    "-Xms100m",
-    s"org.scalameta:metals_2.13:$metalsVersion",
-    "-o",
-    (extensionDirectory / "metals").show,
-    "-f"
-  )
   _ <- Files[IO].copy(
     currentDirectory / "TreeSitterParserBuild" / "Makefile",
     currentDirectory / "tree-sitter-scala" / "Makefile",

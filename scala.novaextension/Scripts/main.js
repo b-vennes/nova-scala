@@ -57,7 +57,7 @@ function startMetals() {
 function setupDoctor() {
   if (!metalsLanguageClient) return;
 
-  console.log("adding on request hook");
+  console.log("Adding on request hook.");
   metalsLanguageClient.onNotification(
     "metals/executeClientCommand",
     request => {
@@ -85,24 +85,122 @@ function deactivateMetals() {
   metalsLanguageClient = null;
 }
 
-function subscribeToConfig() {
-  nova.config.observe("scala.metals-path", function (path) {
-    this.start(path);
-  });
-}
-
 function setupImportBuildCommand() {
   nova.commands.register(
     "importBuild",
-    (input) =>
-      importBuild()
+    _ => importBuild()
+  );
+}
+
+function installMetals(version, onSuccess, onFailure) {
+  const args = [
+    "coursier",
+    "bootstrap",
+    "--java-opt",
+    "-XX:+UseG1GC",
+    "--java-opt",
+    "-XX:+UseStringDeduplication",
+    "--java-opt",
+    "-Xss4m",
+    "--java-opt",
+    "-Xms100m",
+    `org.scalameta:metals_2.13:${version}`,
+    "-o",
+    "metals",
+    "-f"
+  ];
+
+  const process = new Process("/usr/bin/env", {
+    args,
+    cwd: nova.extension.path
+  });
+
+  process.onStdout(line => {
+    console.log("Coursier: " + line);
+  });
+
+  process.onStderr(line => {
+    console.log("Coursier ERR: " + line);
+  });
+
+  process.onDidExit(result => {
+    if (result === 0) onSuccess();
+    else onFailure();
+  });
+
+  console.log(`Installing metals at ${nova.extension.path}/metals`);
+
+  process.start();
+}
+
+function runSetupSteps() {
+    startMetals();
+    setupDoctor();
+}
+
+function registerCommands() {
+  setupImportBuildCommand(); 
+  setupUpdateMetalsCommand();
+  setupDoctorCommand();
+}
+
+function installMetalsIfNotExists(afterInstalled) {
+  const metalsExists = nova.fs.access(`${nova.extension.path}/metals`, nova.fs.F_OK);  
+
+  if (!metalsExists) {
+    console.log("Installing metals.");
+    installMetals(
+      "latest.release",
+      afterInstalled,
+      () => {
+        nova.notifications.add(new NotificationRequest(
+          "Failed to install metals. Maybe restart the plugin?"
+        ));
+      }
+    );
+  } else {
+    console.log("Metals is already installed.");
+    afterInstalled();
+  }
+}
+
+function updateMetals() {
+  deactivateMetals();
+
+  installMetals(
+    "latest.release",
+    () => {
+      let notification = new NotificationRequest("metals-updated");
+      notification.body = nova.localize("Metals updated.");
+      nova.notifications.add(notification);
+      runSetupSteps();
+    },
+    () => {
+      let notification = new NotificationRequest("metals-update-failed");
+      notification.body = nova.localize("Failed to update metals. Maybe try again or restart the plugin?");
+      nova.notifications.add(notification);
+    }
+  );
+}
+
+function setupUpdateMetalsCommand() {
+  nova.commands.register(
+    "updateMetals",
+    _ => updateMetals()
+  );
+}
+
+function setupDoctorCommand() {
+  nova.commands.register(
+    "openDoctor",
+    _ => runDoctor()
   );
 }
 
 exports.activate = function () {
-  startMetals();
-  setupDoctor();
-  setupImportBuildCommand();
+  registerCommands();
+
+  installMetalsIfNotExists(runSetupSteps);
 };
 
 exports.deactivate = function () {

@@ -25,6 +25,27 @@
         "filters": {
             "syntaxes": ["scala"]
         }
+      },
+      {
+        "title": "Metals: Update",
+        "command": "updateMetals",
+        "filters": {
+            "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Info",
+        "command": "metalsInfo",
+        "filters": {
+            "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Doctor",
+        "command": "openDoctor",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
       }
     ]
   }
