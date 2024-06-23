@@ -3,7 +3,7 @@
   "name": "Scala",
   "organization": "com.brandenvennes",
   "description": "Scala language support",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "homepage": "https://github.com/b-vennes/nova-scala",
   "bugs": "https://github.com/b-vennes/nova-scala/issues",
   "categories": [

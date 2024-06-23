@@ -1,5 +1,9 @@
 **Scala** provides syntax highlighting and autocompletion for the Scala language using the [Metals language server](https://scalameta.org/metals/).
 
+This extension requires Coursier to be installed and on the system path.
+
+https://get-coursier.io/
+
 ## Language Support
 
 Supported Features:
