@@ -1,9 +1,11 @@
 {
   "identifier": "com.brandenvennes.scala",
   "name": "Scala",
-  "organization": "Branden Vennes",
-  "description": "Scala syntax highlighting, completions,",
-  "version": "1.0",
+  "organization": "com.brandenvennes",
+  "description": "Scala language support",
+  "version": "0.1.0",
+  "homepage": "https://github.com/b-vennes/nova-scala",
+  "bugs": "https://github.com/b-vennes/nova-scala/issues",
   "categories": [
     "languages",
     "completions"
@@ -20,29 +22,92 @@
   "commands": {
     "command-palette": [
       {
-        "title": "Metals: Import Build",
-        "command": "importBuild",
+        "title": "Metals: Import build",
+        "command": "metals.importBuild",
         "filters": {
             "syntaxes": ["scala"]
         }
       },
       {
         "title": "Metals: Update",
-        "command": "updateMetals",
-        "filters": {
-            "syntaxes": ["scala"]
-        }
-      },
-      {
-        "title": "Metals: Info",
-        "command": "metalsInfo",
+        "command": "metals.update",
         "filters": {
             "syntaxes": ["scala"]
         }
       },
       {
         "title": "Metals: Doctor",
-        "command": "openDoctor",
+        "command": "metals.doctor",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Switch build server",
+        "command": "metals.switchBuildServer",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Connect to build server",
+        "command": "metals.connectToBuildServer",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Cancel compilation",
+        "command": "metals.cancelCompilation",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Cascade compile",
+        "command": "metals.cascadeCompile",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Clean compile",
+        "command": "metals.cleanCompile",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Reset notifications",
+        "command": "metals.resetNotifications",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Restart build server",
+        "command": "metals.restartBuildServer",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Disconnect from old build server",
+        "command": "metals.disconnectFromOldBuildServer",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Reset workspace",
+        "command": "metals.resetWorkspace",
+        "fields": {
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: List build targets",
+        "command": "metals.listBuildTargets",
         "fields": {
           "syntaxes": ["scala"]
         }

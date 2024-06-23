@@ -1,19 +1,37 @@
 var metalsLanguageClient = null;
 
-function metalsExecuteCommand(command, args) {
+function metalsExecuteCommand(command, args, onSuccess) {
   if (!metalsLanguageClient) return;
 
-  metalsLanguageClient.sendRequest(
-    "workspace/executeCommand",
-    {
-      command: command,
-      arguments: args
-    }
-  );
+  metalsLanguageClient
+    .sendRequest(
+      "workspace/executeCommand",
+      {
+        command: command,
+        arguments: args
+      }
+    )
+    .then(
+      response => {
+        if (onSuccess) {
+          onSuccess(response);
+        }
+      },
+      error => {
+        console.log(`Failed to execute Metals command: ${error}`);
+      }
+    );
 }
 
-const importBuild = () => metalsExecuteCommand("build-import", null);
-const runDoctor = () => metalsExecuteCommand("doctor-run", null);
+const importBuild = () => metalsExecuteCommand("build-import");
+const runDoctor = () => metalsExecuteCommand("doctor-run");
+
+function notify(key, title, message) {
+  let notification = new NotificationRequest(key);
+  notification.title = nova.localize(title);
+  notification.body = nova.localize(message);
+  nova.notifications.add(notification);
+}
 
 function startMetals() {
   if (metalsLanguageClient) {
@@ -30,7 +48,7 @@ function startMetals() {
   const clientOptions = {
     // The set of document syntaxes for which the server is valid
     syntaxes: ["scala"],
-    debug: true,
+    debug: false,
     initializationOptions: {
       isHttpEnabled: true,
       doctorVisibilityProvider: true,
@@ -57,16 +75,10 @@ function startMetals() {
 function setupDoctor() {
   if (!metalsLanguageClient) return;
 
-  console.log("Adding on request hook.");
   metalsLanguageClient.onNotification(
     "metals/executeClientCommand",
     request => {
-      console.log(`Received execute client command: ${JSON.stringify(request)}`);
-
-      const command = request.command;
-      console.log(`Command is '${command}'.`)
-      if (command && command === "metals-doctor-run") {
-        console.log("Received run doctor request.");
+      if (request.command === "metals-doctor-run") {
         runDoctor();
       }
     }
@@ -75,7 +87,6 @@ function setupDoctor() {
 
 function deactivateMetals() {
   if (!metalsLanguageClient) {
-    console.log("No Metals language client started.")
     return;
   }
 
@@ -83,13 +94,6 @@ function deactivateMetals() {
   nova.subscriptions.remove(metalsLanguageClient);
 
   metalsLanguageClient = null;
-}
-
-function setupImportBuildCommand() {
-  nova.commands.register(
-    "importBuild",
-    _ => importBuild()
-  );
 }
 
 function installMetals(version, onSuccess, onFailure) {
@@ -128,8 +132,6 @@ function installMetals(version, onSuccess, onFailure) {
     else onFailure();
   });
 
-  console.log(`Installing metals at ${nova.extension.path}/metals`);
-
   process.start();
 }
 
@@ -138,28 +140,16 @@ function runSetupSteps() {
     setupDoctor();
 }
 
-function registerCommands() {
-  setupImportBuildCommand(); 
-  setupUpdateMetalsCommand();
-  setupDoctorCommand();
-}
-
 function installMetalsIfNotExists(afterInstalled) {
   const metalsExists = nova.fs.access(`${nova.extension.path}/metals`, nova.fs.F_OK);  
 
   if (!metalsExists) {
-    console.log("Installing metals.");
     installMetals(
       "latest.release",
       afterInstalled,
-      () => {
-        nova.notifications.add(new NotificationRequest(
-          "Failed to install metals. Maybe restart the plugin?"
-        ));
-      }
+      () => notify("metals-install-failed", "Metals: Install failed", "Coursier must be installed and on the system path.")
     );
   } else {
-    console.log("Metals is already installed.");
     afterInstalled();
   }
 }
@@ -170,30 +160,69 @@ function updateMetals() {
   installMetals(
     "latest.release",
     () => {
-      let notification = new NotificationRequest("metals-updated");
-      notification.body = nova.localize("Metals updated.");
-      nova.notifications.add(notification);
+      notify(
+        "metals-updated",
+        "Metals updated successfully",
+      );
       runSetupSteps();
     },
     () => {
-      let notification = new NotificationRequest("metals-update-failed");
-      notification.body = nova.localize("Failed to update metals. Maybe try again or restart the plugin?");
-      nova.notifications.add(notification);
+      notify(
+        "metals-update-failed",
+        "Metals update failed",
+        "Failed to update metals. Ensure that Coursier is installed and on the system path."
+      );
     }
   );
 }
 
-function setupUpdateMetalsCommand() {
+function registerCommands() {
   nova.commands.register(
-    "updateMetals",
+    "metals.importBuild",
+    _ => importBuild()
+  );
+
+  nova.commands.register(
+    "metals.update",
     _ => updateMetals()
   );
-}
 
-function setupDoctorCommand() {
   nova.commands.register(
-    "openDoctor",
+    "metals.doctor",
     _ => runDoctor()
+  );
+
+  function registerMetalsCommand(
+    novaCommand,
+    metalsCommand,
+    args,
+    onSuccess
+  ) {
+    nova.commands.register(
+      novaCommand,
+      _ => metalsExecuteCommand(metalsCommand, args, onSuccess)
+    );
+  }
+
+  registerMetalsCommand("metals.switchBuildServer", "bsp-switch");
+  registerMetalsCommand("metals.connectToBuildServer", "build-connect");
+  registerMetalsCommand("metals.cancelCompilation", "compile-cancel");
+  registerMetalsCommand("metals.cascadeCompile", "compile-cascade");
+  registerMetalsCommand("metals.cleanCompile", "compile-clean");
+  registerMetalsCommand("metals.resetNotifications", "reset-notifications");
+  registerMetalsCommand("metals.restartBuildServer", "build-restart");
+  registerMetalsCommand("metals.disconnectFromOldBuildServer", "build-disconnect");
+  registerMetalsCommand("metals.resetWorkspace", "reset-workspace");
+  registerMetalsCommand(
+    "metals.listBuildTargets",
+    "list-build-targets",
+    null,
+    response =>
+      notify(
+        "build-targets",
+        "Metals build targets",
+        response.join("\n")
+      )
   );
 }
 
