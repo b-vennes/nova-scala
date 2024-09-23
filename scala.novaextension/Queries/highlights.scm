@@ -33,6 +33,8 @@
 
 "sealed" @keyword.modifier
 "extends" @keyword.modifier
+"with" @keyword.modifier
+
 (access_modifier
 	"private" @keyword.modifier
 )
@@ -48,6 +50,7 @@
 "using" @keyword.construct
 
 "new" @operator
+"throw" @operator
 
 (lambda_expression
 	"=>" @operator
@@ -100,7 +103,7 @@
 (generic_function
 	function: (field_expression
 		field: (identifier)	@identifier.function
-	)	
+	)
 )
 
 (field_expression

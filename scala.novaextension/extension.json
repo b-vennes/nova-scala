@@ -3,7 +3,7 @@
   "name": "Scala",
   "organization": "com.brandenvennes",
   "description": "Scala language support",
-  "version": "0.1.1",
+  "version": "0.3.0",
   "homepage": "https://github.com/b-vennes/nova-scala",
   "bugs": "https://github.com/b-vennes/nova-scala/issues",
   "categories": [
@@ -19,20 +19,37 @@
     "filesystem": "readwrite",
     "requests": true
   },
+  "config": [
+    {
+      "key": "java.home",
+      "type": "path",
+      "required": false,
+      "title": "Java Home",
+      "allowFolders": true,
+      "allowFiles": false
+    }
+  ],
   "commands": {
     "command-palette": [
       {
         "title": "Metals: Import build",
         "command": "metals.importBuild",
         "filters": {
-            "syntaxes": ["scala"]
+          "syntaxes": ["scala"]
         }
       },
       {
         "title": "Metals: Update",
         "command": "metals.update",
         "filters": {
-            "syntaxes": ["scala"]
+          "syntaxes": ["scala"]
+        }
+      },
+      {
+        "title": "Metals: Restart",
+        "command": "metals.restart",
+        "filters": {
+          "syntaxes": ["scala"]
         }
       },
       {

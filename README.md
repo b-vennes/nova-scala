@@ -1,55 +1,12 @@
-<!--
-👋 Hello! As Nova users browse the extensions library, a good README can help them understand what your extension does, how it works, and what setup or configuration it may require.
+# Nova Scala
 
-Not every extension will need every item described below. Use your best judgement when deciding which parts to keep to provide the best experience for your new users.
+**Nova Scala** provides syntax highlighting and autocompletion for the Scala
+language in the [Nova Editor](https://nova.app/).
 
-💡 Quick Tip! As you edit this README template, you can preview your changes by selecting **Extensions → Activate Project as Extension**, opening the Extension Library, and selecting "Scala" in the sidebar.
+## Signing The Tree Sitter Library
 
-Let's get started!
--->
+In order for the extension to be published, the Tree Sitter Library needs to be
+signed.
 
-<!--
-🎈 Include a brief description of the features your syntax extension provides. For example:
--->
-
-**Scala** provides syntax highlighting and autocompletion for the Scala language. 
-
-<!--
-🎈 It can also be helpful to include a screenshot or GIF showing your extension in action:
--->
-
-![](https://nova.app/images/en/dark/editor.png)
-
-## Language Support
-
-<!--
-🎈 Whether your extension covers the entirety of a language's syntax or a subset, it can be helpful to describe that for users:
--->
-
-Scala currently supports the following features of Important Language:
-
-- Syntax Highlighting
-- Lorem
-- Ipsum
-- Dolor
-
-Support for:
-
-- Sit
-- Amet 
-
-is planned for a future update.
-
-<!--
-👋 That's it! Happy developing!
-
-P.S. If you'd like, you can remove these comments before submitting your extension 😉
--->
-
-## Get Metals Instance
-
-`./get_metals.sh {version}`
-
-### Example
-
-`./get_metals.sh 1.3.0`
+From the root directory run
+`codesign -s - ./scala.novaextension/Syntaxes/libtree-sitter-scala.dylib`
