@@ -27,6 +27,13 @@
       "title": "Java Home",
       "allowFolders": true,
       "allowFiles": false
+    },
+    {
+      "key": "metals.enabled",
+      "type": "boolean",
+      "required": false,
+      "title": "Enable Metals",
+      "default": true
     }
   ],
   "commands": {

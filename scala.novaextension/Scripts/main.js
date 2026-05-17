@@ -1,6 +1,7 @@
 let metalsLanguageClient = null;
 
 const javaHomeKey = "java.home";
+const metalsEnabledKey = "metals.enabled";
 
 function metalsExecuteCommand(command, args, onSuccess) {
   if (!metalsLanguageClient) return;
@@ -38,7 +39,6 @@ function notify(key, title, message) {
 function startMetals(javaHome) {
   if (metalsLanguageClient) {
     deactivateMetals();
-    nova.subscriptions.remove(metalsLanguageClient);
   }
 
   const localPath = `${nova.extension.path}/metals`;
@@ -158,7 +158,10 @@ function installMetals(version, javaHome, onSuccess, onFailure) {
 }
 
 function runSetupSteps(javaHome) {
-  startMetals(javaHome);
+  const metalsEnabled = nova.config.get(metalsEnabledKey);
+  if (metalsEnabled) {
+    startMetals(javaHome);
+  }
   setupDoctor();
 }
 
@@ -275,6 +278,17 @@ function registerConfig() {
   nova.config.onDidChange(
     javaHomeKey,
     (value) => updateMetals(value),
+  );
+
+  nova.config.onDidChange(
+    metalsEnabledKey,
+    (value) => {
+      if (value) {
+        startMetals(nova.config.get(javaHomeKey));
+      } else {
+        deactivateMetals();
+      }
+    },
   );
 }
 
